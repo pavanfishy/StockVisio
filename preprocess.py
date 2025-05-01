@@ -70,12 +70,33 @@ def preprocess_dhan(df):
     df["Broker"] = "Dhan"
     return df[["TradeTime", "Symbol", "Type", "Segment", "Quantity", "Price", "Exchange", "Broker"]]
 
+def preprocess_grow(df):
+    """Clean and standardize Dhan trade book."""
+    df = df.rename(columns={
+        "Date": "Date",
+        "Time": "Time",
+        "Stock_Name": "Symbol",
+        "B/S": "Type",
+        "Lot": "Quantity",
+        "Trade Price": "Price",
+        "Segment": "Segment",
+        "Exchange": "Exchange"
+    })
+    df["TradeTime"] = pd.to_datetime(df["Date"] + " " + df["Time"])
+    df["Symbol"] = df["Symbol"].str.upper()
+    df["Type"] = df["Type"].str.upper()
+    df["Segment"] = df["Segment"].str.upper()
+    df["Segment"] = df["Segment"].replace({"EQ": "EQUITY", "NSE_CASH": "EQUITY"})
+    df["Broker"] = "Grow"
+    return df[["TradeTime", "Symbol", "Type", "Segment", "Quantity", "Price", "Exchange", "Broker"]]
+
 def process_broker_trades(base_folder):
     """Main function to process all brokers."""
     brokers = {
         "zerodha": preprocess_zerodha,
         "fyers": preprocess_fyers,
-        "dhan": preprocess_dhan
+        "dhan": preprocess_dhan,
+        "grow": preprocess_grow
     }
 
     final_data = []
